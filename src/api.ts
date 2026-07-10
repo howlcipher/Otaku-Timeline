@@ -43,7 +43,7 @@ query ($name: String, $type: MediaType, $page: Int) {
 }
 `;
 
-function getSeasonFromMonth(month: number) {
+export function getSeasonFromMonth(month: number) {
   if (month === 12 || month <= 2) return 'WINTER';
   if (month >= 3 && month <= 5) return 'SPRING';
   if (month >= 6 && month <= 8) return 'SUMMER';
@@ -143,7 +143,7 @@ export async function fetchUserAnime(username: string, type: 'ANIME' | 'MANGA' =
   return processEntries(allEntries, userAvatar, userName);
 }
 
-function processEntries(entries: any[], userAvatar: string, userName: string): ProcessedData {
+export function processEntries(entries: any[], userAvatar: string, userName: string): ProcessedData {
   const grouped: Record<number, SeasonGroup> = {};
   const watching: AnimeEntry[] = [];
   const paused: AnimeEntry[] = [];
@@ -185,6 +185,11 @@ function processEntries(entries: any[], userAvatar: string, userName: string): P
       genres: media.genres || []
     };
 
+    if (entry.score > 0) {
+      scoreSum += entry.score;
+      scoredCount++;
+    }
+
     allYears.add(year);
 
     if (media.genres) {
@@ -207,10 +212,6 @@ function processEntries(entries: any[], userAvatar: string, userName: string): P
       planning.push(animeEntry);
     } else {
       completedCount++;
-      if (entry.score > 0) {
-        scoreSum += entry.score;
-        scoredCount++;
-      }
 
       // Find latest color for COMPLETED
       if (entry.completedAt && entry.completedAt.year) {

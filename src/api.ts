@@ -56,6 +56,7 @@ export interface AnimeEntry {
   season: string;
   year: number;
   listStatus: string;
+  genres: string[];
 }
 
 export interface SeasonGroup {
@@ -85,6 +86,8 @@ export interface ProcessedData {
     topGenre: string;
     topStudio: string;
   };
+  uniqueGenres: string[];
+  uniqueYears: number[];
 }
 
 export async function fetchUserAnime(username: string, type: 'ANIME' | 'MANGA' = 'ANIME'): Promise<ProcessedData> {
@@ -143,6 +146,8 @@ function processEntries(entries: any[]): ProcessedData {
 
   const genreCounts: Record<string, number> = {};
   const studioCounts: Record<string, number> = {};
+  const allGenres = new Set<string>();
+  const allYears = new Set<number>();
 
   for (const entry of entries) {
     const media = entry.media;
@@ -163,11 +168,17 @@ function processEntries(entries: any[]): ProcessedData {
       score: entry.score,
       season: season,
       year: year,
-      listStatus: listStatus
+      listStatus: listStatus,
+      genres: media.genres || []
     };
 
+    allYears.add(year);
+
     if (media.genres) {
-      media.genres.forEach((g: string) => genreCounts[g] = (genreCounts[g] || 0) + 1);
+      media.genres.forEach((g: string) => {
+        genreCounts[g] = (genreCounts[g] || 0) + 1;
+        allGenres.add(g);
+      });
     }
     if (media.studios && media.studios.nodes) {
       media.studios.nodes.forEach((s: any) => studioCounts[s.name] = (studioCounts[s.name] || 0) + 1);
@@ -234,6 +245,8 @@ function processEntries(entries: any[]): ProcessedData {
       meanScore,
       topGenre,
       topStudio
-    }
+    },
+    uniqueGenres: Array.from(allGenres).sort(),
+    uniqueYears: Array.from(allYears).sort((a, b) => b - a)
   };
 }

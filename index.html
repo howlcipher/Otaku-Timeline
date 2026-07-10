@@ -35,6 +35,16 @@
         <button id="masterpieceToggle" aria-label="Toggle Masterpiece Filter">★ Masterpieces Only</button>
       </div>
 
+      <div class="advanced-filters hidden" id="advanced-filters" style="display: flex; gap: 1rem; margin-top: 1rem; justify-content: center; flex-wrap: wrap;">
+        <input type="text" id="searchInput" placeholder="Search titles..." style="padding: 0.5rem; border: 2px solid var(--border-color); background: var(--bg-color); color: var(--text-color); font-family: var(--font-mono); border-radius: 4px; min-width: 200px;" />
+        <select id="genreFilter" style="padding: 0.5rem; border: 2px solid var(--border-color); background: var(--bg-color); color: var(--text-color); font-family: var(--font-mono); border-radius: 4px;">
+          <option value="">All Genres</option>
+        </select>
+        <select id="yearFilter" style="padding: 0.5rem; border: 2px solid var(--border-color); background: var(--bg-color); color: var(--text-color); font-family: var(--font-mono); border-radius: 4px;">
+          <option value="">All Years</option>
+        </select>
+      </div>
+
       <nav id="quick-nav" class="hidden" aria-label="Section Navigation">
         <a href="#section-watching" id="nav-watching-text">Watching</a>
         <a href="#section-planning" id="nav-planning-text">Plan to Watch</a>

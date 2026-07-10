@@ -16,11 +16,19 @@ const quickNav = document.getElementById('quick-nav') as HTMLElement;
 const typeToggleBtn = document.getElementById('typeToggle') as HTMLButtonElement;
 const masterpieceToggleBtn = document.getElementById('masterpieceToggle') as HTMLButtonElement;
 
+const advancedFilters = document.getElementById('advanced-filters') as HTMLDivElement;
+const searchInput = document.getElementById('searchInput') as HTMLInputElement;
+const genreFilterSelect = document.getElementById('genreFilter') as HTMLSelectElement;
+const yearFilterSelect = document.getElementById('yearFilter') as HTMLSelectElement;
+
 // State
 let isLight = false;
 let isColorBlind = false;
 let currentType: 'ANIME' | 'MANGA' = 'ANIME';
 let filterMasterpiece = false;
+let searchQuery = '';
+let filterGenre = '';
+let filterYear = '';
 let lastU1Data: any = null;
 let lastU2Data: any = null;
 
@@ -38,17 +46,33 @@ masterpieceToggleBtn.addEventListener('click', () => {
   } else {
     masterpieceToggleBtn.classList.remove('active');
   }
-  
-  if (lastU1Data) {
-    if (username2Input.value.trim()) {
-      renderCompareStats(lastU1Data.stats, lastU2Data.stats);
-      renderComparison(username1Input.value.trim(), username2Input.value.trim(), lastU1Data, lastU2Data);
-    } else {
-      renderStats(lastU1Data.stats);
-      renderTimeline(lastU1Data, archiveContent);
-    }
-  }
+  reRender();
 });
+
+searchInput.addEventListener('input', () => {
+  searchQuery = searchInput.value;
+  reRender();
+});
+genreFilterSelect.addEventListener('change', () => {
+  filterGenre = genreFilterSelect.value;
+  reRender();
+});
+yearFilterSelect.addEventListener('change', () => {
+  filterYear = yearFilterSelect.value;
+  reRender();
+});
+
+function reRender() {
+  if (!lastU1Data) return;
+  const u2 = username2Input.value.trim();
+  if (u2 && lastU2Data) {
+    renderCompareStats(lastU1Data.stats, lastU2Data.stats);
+    renderComparison(username1Input.value.trim(), u2, lastU1Data, lastU2Data);
+  } else {
+    renderStats(lastU1Data.stats);
+    renderTimeline(lastU1Data, archiveContent);
+  }
+}
 
 function updateNavText() {
   const tWatch = document.getElementById('nav-watching-text');
@@ -90,10 +114,13 @@ function renderCard(entry: AnimeEntry, showScore: boolean = true, index: number 
 
 function filterEntries(entries: AnimeEntry[]) {
   if (!entries) return [];
-  if (filterMasterpiece) {
-    return entries.filter(e => e.score === 10 || e.score === 100);
-  }
-  return entries;
+  return entries.filter(e => {
+    if (filterMasterpiece && e.score !== 10 && e.score !== 100) return false;
+    if (searchQuery && !e.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (filterGenre && (!e.genres || !e.genres.includes(filterGenre))) return false;
+    if (filterYear && e.year.toString() !== filterYear) return false;
+    return true;
+  });
 }
 
 function renderTimeline(data: any, container: HTMLElement) {
@@ -368,6 +395,27 @@ function renderCompareStats(s1: any, s2: any) {
   `;
 }
 
+function populateFilters(u1Data: any, u2Data: any) {
+  const gSet = new Set<string>(u1Data.uniqueGenres);
+  const ySet = new Set<number>(u1Data.uniqueYears);
+  if (u2Data) {
+    u2Data.uniqueGenres.forEach((g: string) => gSet.add(g));
+    u2Data.uniqueYears.forEach((y: number) => ySet.add(y));
+  }
+  const genres = Array.from(gSet).sort();
+  const years = Array.from(ySet).sort((a, b) => b - a);
+
+  let gHtml = '<option value="">All Genres</option>';
+  genres.forEach(g => gHtml += `<option value="${g}">${g}</option>`);
+  genreFilterSelect.innerHTML = gHtml;
+  genreFilterSelect.value = filterGenre;
+
+  let yHtml = '<option value="">All Years</option>';
+  years.forEach(y => yHtml += `<option value="${y}">${y}</option>`);
+  yearFilterSelect.innerHTML = yHtml;
+  yearFilterSelect.value = filterYear;
+}
+
 async function handleLoad() {
   const u1 = username1Input.value.trim() || 'howlcipher';
   const u2 = username2Input.value.trim();
@@ -399,6 +447,9 @@ async function handleLoad() {
         document.documentElement.style.removeProperty('--dynamic-secondary');
       }
       
+      populateFilters(u1Data, u2Data);
+      advancedFilters.classList.remove('hidden');
+
       renderCompareStats(u1Data.stats, u2Data.stats);
       renderComparison(u1, u2, u1Data, u2Data);
     } else {
@@ -407,6 +458,9 @@ async function handleLoad() {
       }
       document.documentElement.style.removeProperty('--dynamic-secondary');
       
+      populateFilters(u1Data, null);
+      advancedFilters.classList.remove('hidden');
+
       renderStats(u1Data.stats);
       renderTimeline(u1Data, archiveContent);
     }

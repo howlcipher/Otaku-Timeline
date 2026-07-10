@@ -266,6 +266,50 @@ button:focus, input:focus, a:focus {
   background: transparent;
 }
 
+/* Stats Banner */
+.stats-banner {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+}
+
+.stat-box {
+  flex: 1;
+  min-width: 150px;
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  padding: 1.5rem;
+  text-align: center;
+  border-bottom: 4px solid var(--primary-color);
+}
+
+.stat-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: var(--text-color);
+  opacity: 0.8;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: bold;
+  font-family: var(--font-main);
+  color: var(--primary-color);
+}
+
+.stat-value.compare {
+  font-size: 1.5rem;
+}
+
+[data-colorblind="true"] .stat-box {
+  border-bottom: 4px dashed var(--primary-color);
+}
+
 /* Compare Layout */
 .compare-title {
   text-transform: uppercase;

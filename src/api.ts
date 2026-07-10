@@ -71,6 +71,11 @@ export interface ProcessedData {
   watching: AnimeEntry[];
   timeline: YearGroup[];
   latestColor: string | null;
+  stats: {
+    completed: number;
+    watching: number;
+    meanScore: string;
+  };
 }
 
 export async function fetchUserAnime(username: string): Promise<ProcessedData> {
@@ -119,6 +124,10 @@ function processEntries(entries: any[]): ProcessedData {
   
   let latestDateValue = 0;
   let latestColor: string | null = null;
+  
+  let completedCount = 0;
+  let scoreSum = 0;
+  let scoredCount = 0;
 
   for (const entry of entries) {
     const media = entry.media;
@@ -145,6 +154,12 @@ function processEntries(entries: any[]): ProcessedData {
     if (listStatus === 'CURRENT') {
       watching.push(animeEntry);
     } else {
+      completedCount++;
+      if (entry.score > 0) {
+        scoreSum += entry.score;
+        scoredCount++;
+      }
+
       // Find latest color for COMPLETED
       if (entry.completedAt && entry.completedAt.year) {
         const { year, month, day } = entry.completedAt;
@@ -174,9 +189,16 @@ function processEntries(entries: any[]): ProcessedData {
     });
   }
 
+  const meanScore = scoredCount > 0 ? (scoreSum / scoredCount).toFixed(1) : '0';
+
   return {
     watching,
     timeline: result,
-    latestColor
+    latestColor,
+    stats: {
+      completed: completedCount,
+      watching: watching.length,
+      meanScore
+    }
   };
 }

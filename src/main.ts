@@ -10,6 +10,7 @@ const loadingDiv = document.getElementById('loading') as HTMLDivElement;
 const errorDiv = document.getElementById('error') as HTMLDivElement;
 const archiveContent = document.getElementById('archive-content') as HTMLDivElement;
 const compareStats = document.getElementById('compare-stats') as HTMLElement;
+const statsContainer = document.getElementById('stats-container') as HTMLElement;
 
 // Theming
 let isLight = false;
@@ -162,6 +163,44 @@ function renderComparison(u1Name: string, u2Name: string, u1Data: any, u2Data: a
   compareStats.classList.add('hidden');
 }
 
+function renderStats(stats: any) {
+  statsContainer.innerHTML = `
+    <div class="stats-banner">
+      <div class="stat-box">
+        <span class="stat-label">COMPLETED</span>
+        <span class="stat-value">${stats.completed}</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">WATCHING</span>
+        <span class="stat-value">${stats.watching}</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">MEAN SCORE</span>
+        <span class="stat-value">${stats.meanScore}</span>
+      </div>
+    </div>
+  `;
+}
+
+function renderCompareStats(s1: any, s2: any) {
+  statsContainer.innerHTML = `
+    <div class="stats-banner">
+      <div class="stat-box">
+        <span class="stat-label">COMPLETED</span>
+        <span class="stat-value compare">U1: ${s1.completed} | U2: ${s2.completed}</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">WATCHING</span>
+        <span class="stat-value compare">U1: ${s1.watching} | U2: ${s2.watching}</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">MEAN SCORE</span>
+        <span class="stat-value compare">U1: ${s1.meanScore} | U2: ${s2.meanScore}</span>
+      </div>
+    </div>
+  `;
+}
+
 async function handleLoad() {
   const u1 = username1Input.value.trim() || 'howlcipher';
   const u2 = username2Input.value.trim();
@@ -170,6 +209,7 @@ async function handleLoad() {
   loadingDiv.classList.remove('hidden');
   archiveContent.innerHTML = '';
   compareStats.innerHTML = '';
+  statsContainer.innerHTML = '';
 
   try {
     const u1Data = await fetchUserAnime(u1);
@@ -188,6 +228,7 @@ async function handleLoad() {
         document.documentElement.style.removeProperty('--dynamic-secondary');
       }
       
+      renderCompareStats(u1Data.stats, u2Data.stats);
       renderComparison(u1, u2, u1Data, u2Data);
     } else {
       if (u1Data.latestColor) {
@@ -197,6 +238,7 @@ async function handleLoad() {
       }
       document.documentElement.style.removeProperty('--dynamic-secondary');
       
+      renderStats(u1Data.stats);
       renderTimeline(u1Data.timeline, u1Data.watching, archiveContent);
     }
   } catch (err: any) {

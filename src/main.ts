@@ -285,7 +285,17 @@ async function handleLoad() {
   }
 }
 
+// Event Listeners
 loadBtn.addEventListener('click', handleLoad);
 
-// Load default on startup
+function handleEnter(e: KeyboardEvent) {
+  if (e.key === 'Enter') {
+    handleLoad();
+  }
+}
+
+username1Input.addEventListener('keydown', handleEnter);
+username2Input.addEventListener('keydown', handleEnter);
+
+// Handle Theme/Accessibility startup
 handleLoad();

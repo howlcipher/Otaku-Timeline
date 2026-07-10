@@ -2,8 +2,10 @@
   /* Retro Dark Theme (Default) */
   --bg-color: #1a1a1a;
   --text-color: #e0e0e0;
-  --primary-color: #ff5555;
-  --secondary-color: #50fa7b;
+  --theme-primary: #ff5555;
+  --theme-secondary: #50fa7b;
+  --primary-color: var(--dynamic-primary, var(--theme-primary));
+  --secondary-color: var(--dynamic-secondary, var(--theme-secondary));
   --card-bg: #282a36;
   --border-color: #44475a;
   --font-main: 'Space Grotesk', sans-serif;
@@ -14,8 +16,8 @@
 [data-theme="light"] {
   --bg-color: #f4f4f5;
   --text-color: #18181b;
-  --primary-color: #e11d48;
-  --secondary-color: #16a34a;
+  --theme-primary: #e11d48;
+  --theme-secondary: #16a34a;
   --card-bg: #ffffff;
   --border-color: #d4d4d8;
   --focus-ring: #2563eb;
@@ -23,9 +25,9 @@
 
 [data-colorblind="true"] {
   /* High contrast colors and patterns for colorblindness */
-  --primary-color: #000000;
-  --secondary-color: #ffffff;
-  --border-color: #000000;
+  --primary-color: #000000 !important;
+  --secondary-color: #ffffff !important;
+  --border-color: #000000 !important;
 }
 
 * {

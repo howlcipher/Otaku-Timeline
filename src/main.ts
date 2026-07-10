@@ -153,9 +153,28 @@ async function handleLoad() {
 
     if (u2) {
       const u2Data = await fetchUserAnime(u2);
-      renderComparison(u1, u2, u1Data, u2Data);
+      
+      if (u1Data.latestColor) {
+        document.documentElement.style.setProperty('--dynamic-primary', u1Data.latestColor);
+      } else {
+        document.documentElement.style.removeProperty('--dynamic-primary');
+      }
+      if (u2Data.latestColor) {
+        document.documentElement.style.setProperty('--dynamic-secondary', u2Data.latestColor);
+      } else {
+        document.documentElement.style.removeProperty('--dynamic-secondary');
+      }
+      
+      renderComparison(u1, u2, u1Data.timeline, u2Data.timeline);
     } else {
-      renderTimeline(u1Data, archiveContent);
+      if (u1Data.latestColor) {
+        document.documentElement.style.setProperty('--dynamic-primary', u1Data.latestColor);
+      } else {
+        document.documentElement.style.removeProperty('--dynamic-primary');
+      }
+      document.documentElement.style.removeProperty('--dynamic-secondary');
+      
+      renderTimeline(u1Data.timeline, archiveContent);
     }
   } catch (err: any) {
     showError(err.message || 'Failed to fetch data.');

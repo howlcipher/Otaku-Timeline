@@ -9,6 +9,7 @@ query ($name: String, $page: Int) {
     }
     mediaList(userName: $name, type: ANIME, status: COMPLETED) {
       score
+      completedAt { year month day }
       media {
         id
         title {
@@ -64,7 +65,12 @@ export interface YearGroup {
   seasons: SeasonGroup;
 }
 
-export async function fetchUserAnime(username: string): Promise<YearGroup[]> {
+export interface ProcessedData {
+  timeline: YearGroup[];
+  latestColor: string | null;
+}
+
+export async function fetchUserAnime(username: string): Promise<ProcessedData> {
   let hasNextPage = true;
   let page = 1;
   const allEntries = [];
@@ -104,13 +110,28 @@ export async function fetchUserAnime(username: string): Promise<YearGroup[]> {
   return processEntries(allEntries);
 }
 
-function processEntries(entries: any[]): YearGroup[] {
+function processEntries(entries: any[]): ProcessedData {
   const grouped: Record<number, SeasonGroup> = {};
+  
+  let latestDateValue = 0;
+  let latestColor: string | null = null;
 
   for (const entry of entries) {
     const media = entry.media;
     let season = media.season;
     let year = media.seasonYear;
+    
+    // Find latest color
+    if (entry.completedAt && entry.completedAt.year) {
+      const { year, month, day } = entry.completedAt;
+      const m = month || 1;
+      const d = day || 1;
+      const dateVal = (year * 10000) + (m * 100) + d;
+      if (dateVal > latestDateValue) {
+        latestDateValue = dateVal;
+        latestColor = media.coverImage.color;
+      }
+    }
 
     if (!season || !year) {
       year = media.startDate.year || 1970;
@@ -142,5 +163,8 @@ function processEntries(entries: any[]): YearGroup[] {
     });
   }
 
-  return result;
+  return {
+    timeline: result,
+    latestColor
+  };
 }

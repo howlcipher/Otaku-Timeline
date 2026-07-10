@@ -1,5 +1,18 @@
 # Retro Anime Archive
 
+<div align="center">
+  <img src="https://img.shields.io/github/license/howlcipher/anime_list?style=flat-square&color=ff5555" alt="License" />
+  <img src="https://img.shields.io/github/stars/howlcipher/anime_list?style=flat-square&color=50fa7b" alt="Stars" />
+  <img src="https://img.shields.io/github/issues/howlcipher/anime_list?style=flat-square&color=bd93f9" alt="Issues" />
+</div>
+<br />
+<div align="center">
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" height="40" alt="TypeScript" title="TypeScript" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg" height="40" alt="HTML5" title="HTML5" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg" height="40" alt="CSS3" title="CSS3" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vite/vite-original.svg" height="40" alt="Vite" title="Vite" />
+</div>
+
 A sleek, retro-minimalist web application for viewing and comparing AniList profiles. 
 
 ## Features

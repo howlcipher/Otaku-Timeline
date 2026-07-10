@@ -1,5 +1,5 @@
 import './style.css';
-import { fetchUserAnime, type AnimeEntry, type YearGroup } from './api';
+import { fetchUserAnime, type AnimeEntry } from './api';
 
 const themeToggle = document.getElementById('themeToggle') as HTMLButtonElement;
 const colorBlindToggle = document.getElementById('colorBlindToggle') as HTMLButtonElement;
@@ -11,6 +11,7 @@ const errorDiv = document.getElementById('error') as HTMLDivElement;
 const archiveContent = document.getElementById('archive-content') as HTMLDivElement;
 const compareStats = document.getElementById('compare-stats') as HTMLElement;
 const statsContainer = document.getElementById('stats-container') as HTMLElement;
+const quickNav = document.getElementById('quick-nav') as HTMLElement;
 
 // Theming
 let isLight = false;
@@ -41,6 +42,10 @@ function renderCard(entry: AnimeEntry, showScore: boolean = true, secondScore?: 
   } else if (entry.listStatus === 'CURRENT') {
     let txt = `${entry.season !== 'UNKNOWN' ? entry.season : ''} ${entry.year}`.trim();
     extraHtml = `<div class="card-score">${txt || 'WATCHING'}</div>`;
+  } else if (entry.listStatus === 'PAUSED') {
+    extraHtml = `<div class="card-score">ON HOLD</div>`;
+  } else if (entry.listStatus === 'DROPPED') {
+    extraHtml = `<div class="card-score">DROPPED</div>`;
   } else if (showScore && entry.score > 0) {
     extraHtml = `<div class="card-score">★ ${entry.score}</div>`;
   }
@@ -56,23 +61,49 @@ function renderCard(entry: AnimeEntry, showScore: boolean = true, secondScore?: 
   `;
 }
 
-function renderTimeline(timeline: YearGroup[], watching: AnimeEntry[], container: HTMLElement) {
+function renderTimeline(data: any, container: HTMLElement) {
   let html = '';
   
-  if (watching.length > 0) {
+  if (data.watching && data.watching.length > 0) {
     html += `
-      <section class="year-section">
+      <section id="section-watching" class="year-section">
         <h2 class="year-title">Currently Watching</h2>
         <div class="card-grid" style="margin-bottom: 2rem;">
-          ${watching.map(e => renderCard(e)).join('')}
+          ${data.watching.map((e: AnimeEntry) => renderCard(e)).join('')}
         </div>
       </section>
     `;
   }
 
+  if (data.paused && data.paused.length > 0) {
+    html += `
+      <section id="section-paused" class="year-section">
+        <h2 class="year-title">On Hold</h2>
+        <div class="card-grid" style="margin-bottom: 2rem;">
+          ${data.paused.map((e: AnimeEntry) => renderCard(e)).join('')}
+        </div>
+      </section>
+    `;
+  }
+
+  if (data.dropped && data.dropped.length > 0) {
+    html += `
+      <section id="section-dropped" class="year-section">
+        <h2 class="year-title">Dropped</h2>
+        <div class="card-grid" style="margin-bottom: 2rem;">
+          ${data.dropped.map((e: AnimeEntry) => renderCard(e)).join('')}
+        </div>
+      </section>
+    `;
+  }
+
+  if (data.timeline && data.timeline.length > 0) {
+    html += `<div id="section-completed"></div>`;
+  }
+
   const seasonsOrder = ['WINTER', 'SPRING', 'SUMMER', 'FALL', 'UNKNOWN'];
 
-  for (const yearGrp of timeline) {
+  for (const yearGrp of data.timeline) {
     let hasEntries = false;
     let yearHtml = `<section class="year-section"><h2 class="year-title">${yearGrp.year}</h2>`;
 
@@ -84,7 +115,7 @@ function renderTimeline(timeline: YearGroup[], watching: AnimeEntry[], container
           <div class="season-section">
             <h3 class="season-title">${season}</h3>
             <div class="card-grid">
-              ${entries.map(e => renderCard(e)).join('')}
+              ${entries.map((e: AnimeEntry) => renderCard(e)).join('')}
             </div>
           </div>
         `;
@@ -110,18 +141,18 @@ function renderComparison(u1Name: string, u2Name: string, u1Data: any, u2Data: a
       arr.forEach((e: AnimeEntry) => u1Map.set(e.id, e));
     });
   });
-  if (u1Data.watching) {
-    u1Data.watching.forEach((e: AnimeEntry) => u1Map.set(e.id, e));
-  }
+  if (u1Data.watching) u1Data.watching.forEach((e: AnimeEntry) => u1Map.set(e.id, e));
+  if (u1Data.paused) u1Data.paused.forEach((e: AnimeEntry) => u1Map.set(e.id, e));
+  if (u1Data.dropped) u1Data.dropped.forEach((e: AnimeEntry) => u1Map.set(e.id, e));
 
   u2Data.timeline.forEach((y: any) => {
     Object.values(y.seasons).forEach((arr: any) => {
       arr.forEach((e: AnimeEntry) => u2Map.set(e.id, e));
     });
   });
-  if (u2Data.watching) {
-    u2Data.watching.forEach((e: AnimeEntry) => u2Map.set(e.id, e));
-  }
+  if (u2Data.watching) u2Data.watching.forEach((e: AnimeEntry) => u2Map.set(e.id, e));
+  if (u2Data.paused) u2Data.paused.forEach((e: AnimeEntry) => u2Map.set(e.id, e));
+  if (u2Data.dropped) u2Data.dropped.forEach((e: AnimeEntry) => u2Map.set(e.id, e));
 
   const matches: { e1: AnimeEntry, e2: AnimeEntry }[] = [];
   const onlyU1: AnimeEntry[] = [];
@@ -207,6 +238,7 @@ async function handleLoad() {
 
   hideError();
   loadingDiv.classList.remove('hidden');
+  quickNav.classList.add('hidden');
   archiveContent.innerHTML = '';
   compareStats.innerHTML = '';
   statsContainer.innerHTML = '';
@@ -239,7 +271,12 @@ async function handleLoad() {
       document.documentElement.style.removeProperty('--dynamic-secondary');
       
       renderStats(u1Data.stats);
-      renderTimeline(u1Data.timeline, u1Data.watching, archiveContent);
+      renderTimeline(u1Data, archiveContent);
+    }
+    
+    // Show nav if successful
+    if (!u2) {
+      quickNav.classList.remove('hidden');
     }
   } catch (err: any) {
     showError(err.message || 'Failed to fetch data.');

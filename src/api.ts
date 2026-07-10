@@ -7,7 +7,7 @@ query ($name: String, $page: Int) {
       hasNextPage
       currentPage
     }
-    mediaList(userName: $name, type: ANIME, status_in: [COMPLETED, CURRENT]) {
+    mediaList(userName: $name, type: ANIME, status_in: [COMPLETED, CURRENT, DROPPED, PAUSED]) {
       status
       score
       completedAt { year month day }
@@ -69,6 +69,8 @@ export interface YearGroup {
 
 export interface ProcessedData {
   watching: AnimeEntry[];
+  paused: AnimeEntry[];
+  dropped: AnimeEntry[];
   timeline: YearGroup[];
   latestColor: string | null;
   stats: {
@@ -121,6 +123,8 @@ export async function fetchUserAnime(username: string): Promise<ProcessedData> {
 function processEntries(entries: any[]): ProcessedData {
   const grouped: Record<number, SeasonGroup> = {};
   const watching: AnimeEntry[] = [];
+  const paused: AnimeEntry[] = [];
+  const dropped: AnimeEntry[] = [];
   
   let latestDateValue = 0;
   let latestColor: string | null = null;
@@ -153,6 +157,10 @@ function processEntries(entries: any[]): ProcessedData {
 
     if (listStatus === 'CURRENT') {
       watching.push(animeEntry);
+    } else if (listStatus === 'PAUSED') {
+      paused.push(animeEntry);
+    } else if (listStatus === 'DROPPED') {
+      dropped.push(animeEntry);
     } else {
       completedCount++;
       if (entry.score > 0) {
@@ -193,6 +201,8 @@ function processEntries(entries: any[]): ProcessedData {
 
   return {
     watching,
+    paused,
+    dropped,
     timeline: result,
     latestColor,
     stats: {

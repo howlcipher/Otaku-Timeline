@@ -737,7 +737,7 @@ if (pU1) {
   }
   if (pType === 'MANGA') {
     currentType = 'MANGA';
-    typeToggle.textContent = 'Mode: MANGA';
+    typeToggleBtn.textContent = 'Mode: MANGA';
   }
 } else {
   if (savedU1) username1Input.value = savedU1;

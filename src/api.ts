@@ -194,7 +194,7 @@ export function processEntries(entries: any[], userAvatar: string, userName: str
 
     const animeEntry: AnimeEntry = {
       id: media.id,
-      title: media.title.userPreferred || media.title.english || media.title.romaji,
+      title: media.title.english || media.title.romaji || media.title.userPreferred,
       cover: media.coverImage.extraLarge || media.coverImage.large,
       color: media.coverImage.color || '#333333',
       score: entry.score,
